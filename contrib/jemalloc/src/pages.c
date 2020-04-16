@@ -20,6 +20,14 @@
 
 /* Actual operating system page size, detected during bootstrap, <= PAGE. */
 static size_t	os_page;
+#define positions 4
+static int num_of_mmap[positions] = {0};
+static void * log_mmap(int pos)
+{
+	num_of_mmap[pos] ++;
+	if(num_of_mmap[pos] % 1024 == 0)
+		printf("mmap[%d]: %d\n", pos, num_of_mmap[pos]);
+}
 
 #ifndef _WIN32
 #  define PAGES_PROT_COMMIT (PROT_READ | PROT_WRITE)
@@ -104,6 +112,8 @@ os_pages_trim(void *addr, size_t alloc_size, size_t leadsize, size_t size,
 #ifdef _WIN32
 	os_pages_unmap(addr, alloc_size);
 	void *new_addr = os_pages_map(ret, size, PAGE, commit);
+	log_mmap(0);
+
 	if (new_addr == ret) {
 		return ret;
 	}
@@ -162,6 +172,8 @@ pages_map_slow(size_t size, size_t alignment, bool *commit) {
 	void *ret;
 	do {
 		void *pages = os_pages_map(NULL, alloc_size, alignment, commit);
+		log_mmap(1);
+
 		if (pages == NULL) {
 			return NULL;
 		}
@@ -195,6 +207,8 @@ pages_map(void *addr, size_t size, size_t alignment, bool *commit) {
 	 */
 
 	void *ret = os_pages_map(addr, size, os_page, commit);
+	log_mmap(2);
+
 	if (ret == NULL || ret == addr) {
 		return ret;
 	}
@@ -592,6 +606,8 @@ pages_boot(void) {
 	if (pages_can_purge_lazy) {
 		bool committed = false;
 		void *madv_free_page = os_pages_map(NULL, PAGE, PAGE, &committed);
+		log_mmap(3);
+
 		if (madv_free_page == NULL) {
 			return true;
 		}
