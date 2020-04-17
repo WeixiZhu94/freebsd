@@ -25,7 +25,7 @@ static int num_of_retain[retain_positions] = {0};
 static void log_retain(int pos)
 {
 	num_of_retain[pos] ++;
-	if(opt_retain || num_of_retain[pos] % 1000 == 0)
+	if(num_of_retain[pos] % 1000 == 0)
 		malloc_printf("retain[%d]: %d\n", pos, num_of_retain[pos]);
 }
 
@@ -1175,7 +1175,7 @@ extent_alloc_core(tsdn_t *tsdn, arena_t *arena, void *new_addr, size_t size,
 	}
 	/* mmap. */
 	counter_2 ++;
-	if(counter_2 % 1000 == 0)
+	if(opt_retain || counter_2 % 1000 == 0)
 		malloc_printf("extend_alloc_mmap[%d]: %d\n", 1, counter_2);
 	if ((ret = extent_alloc_mmap(new_addr, size, alignment, zero, commit))
 	    != NULL) {

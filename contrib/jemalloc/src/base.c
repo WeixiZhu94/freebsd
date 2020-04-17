@@ -40,7 +40,7 @@ base_map(tsdn_t *tsdn, extent_hooks_t *extent_hooks, unsigned ind, size_t size) 
 	size_t alignment = HUGEPAGE;
 	if (extent_hooks == &extent_hooks_default) {
 		counter_1 ++;
-		if(counter_1 % 1000 == 0)
+		if(opt_retain || counter_1 % 1000 == 0)
 			malloc_printf("extend_alloc_mmap[%d]: %d\n", 0, counter_1);
 		addr = extent_alloc_mmap(NULL, size, alignment, &zero, &commit);
 	} else {
