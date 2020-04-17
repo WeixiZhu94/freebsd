@@ -20,6 +20,15 @@ static void log_extalloc(int pos)
 		malloc_printf("extalloc[%d]: %d\n", pos, num_of_extalloc[pos]);
 }
 
+#define retain_positions 3
+static int num_of_retain[retain_positions] = {0};
+static void log_retain(int pos)
+{
+	num_of_retain[pos] ++;
+	if(num_of_retain[pos] % 1000 == 0)
+		malloc_printf("retain[%d]: %d\n", pos, num_of_retain[pos]);
+}
+
 /******************************************************************************/
 /* Data. */
 
@@ -1419,6 +1428,7 @@ extent_alloc_retained(tsdn_t *tsdn, arena_t *arena,
 			extent_gdump_add(tsdn, extent);
 		}
 	} else if (opt_retain && new_addr == NULL) {
+		log_retain(0);
 		extent = extent_grow_retained(tsdn, arena, r_extent_hooks, size,
 		    pad, alignment, slab, szind, zero, commit);
 		/* extent_grow_retained() always releases extent_grow_mtx. */
@@ -1483,6 +1493,7 @@ extent_alloc_wrapper(tsdn_t *tsdn, arena_t *arena,
 	    new_addr, size, pad, alignment, slab, szind, zero, commit);
 	if (extent == NULL) {
 		if (opt_retain && new_addr != NULL) {
+			log_retain(1);
 			/*
 			 * When retain is enabled and new_addr is set, we do not
 			 * attempt extent_alloc_wrapper_hard which does mmap
@@ -1491,6 +1502,7 @@ extent_alloc_wrapper(tsdn_t *tsdn, arena_t *arena,
 			 */
 			return NULL;
 		}
+		/* the place our microbenchmark sucks */
 		extent = extent_alloc_wrapper_hard(tsdn, arena, r_extent_hooks,
 		    new_addr, size, pad, alignment, slab, szind, zero, commit);
 	}
