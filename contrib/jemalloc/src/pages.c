@@ -22,7 +22,7 @@
 static size_t	os_page;
 #define positions 4
 static int num_of_mmap[positions] = {0};
-static void * log_mmap(int pos)
+static void log_mmap(int pos)
 {
 	num_of_mmap[pos] ++;
 	if(num_of_mmap[pos] % 100 == 0)
