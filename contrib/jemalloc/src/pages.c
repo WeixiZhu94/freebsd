@@ -1,5 +1,6 @@
 #define JEMALLOC_PAGES_C_
 #include "jemalloc/internal/jemalloc_preamble.h"
+#include "jemalloc/internal/extent_mmap.h"
 
 #include "jemalloc/internal/pages.h"
 
