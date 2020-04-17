@@ -28,6 +28,7 @@ metadata_thp_madvise(void) {
 	    (init_system_thp_mode == thp_mode_default));
 }
 
+static int counter_1 = 0;
 static void *
 base_map(tsdn_t *tsdn, extent_hooks_t *extent_hooks, unsigned ind, size_t size) {
 	void *addr;
@@ -38,6 +39,9 @@ base_map(tsdn_t *tsdn, extent_hooks_t *extent_hooks, unsigned ind, size_t size) 
 	assert(size == HUGEPAGE_CEILING(size));
 	size_t alignment = HUGEPAGE;
 	if (extent_hooks == &extent_hooks_default) {
+		counter_1 ++;
+		if(counter_1 % 1000 == 0)
+			malloc_printf("extend_alloc_mmap[%d]: %d\n", 0, counter_1);
 		addr = extent_alloc_mmap(NULL, size, alignment, &zero, &commit);
 	} else {
 		/* No arena context as we are creating new arenas. */

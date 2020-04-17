@@ -1128,6 +1128,7 @@ extent_recycle(tsdn_t *tsdn, arena_t *arena, extent_hooks_t **r_extent_hooks,
 	return extent;
 }
 
+static int counter_2 = 0;
 /*
  * If the caller specifies (!*zero), it is still possible to receive zeroed
  * memory, in which case *zero is toggled to true.  arena_extent_alloc() takes
@@ -1149,6 +1150,9 @@ extent_alloc_core(tsdn_t *tsdn, arena_t *arena, void *new_addr, size_t size,
 		return ret;
 	}
 	/* mmap. */
+	counter_2 ++;
+	if(counter_2 % 1000 == 0)
+		malloc_printf("extend_alloc_mmap[%d]: %d\n", 1, counter_2);
 	if ((ret = extent_alloc_mmap(new_addr, size, alignment, zero, commit))
 	    != NULL) {
 		return ret;
