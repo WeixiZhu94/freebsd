@@ -16,7 +16,7 @@ static int num_of_extalloc[extalloc_positions] = {0};
 static void log_extalloc(int pos)
 {
 	num_of_extalloc[pos] ++;
-	if(num_of_extalloc[pos] % 1000 == 0)
+	if(opt_retain || num_of_extalloc[pos] % 1000 == 0)
 		malloc_printf("extalloc[%d]: %d\n", pos, num_of_extalloc[pos]);
 }
 
@@ -25,7 +25,7 @@ static int num_of_retain[retain_positions] = {0};
 static void log_retain(int pos)
 {
 	num_of_retain[pos] ++;
-	if(num_of_retain[pos] % 1000 == 0)
+	if(opt_retain || num_of_retain[pos] % 1000 == 0)
 		malloc_printf("retain[%d]: %d\n", pos, num_of_retain[pos]);
 }
 
