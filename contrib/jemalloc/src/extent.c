@@ -16,7 +16,7 @@ static int num_of_extalloc[extalloc_positions] = {0};
 static void log_extalloc(int pos)
 {
 	num_of_extalloc[pos] ++;
-	if(opt_retain || num_of_extalloc[pos] % 1000 == 0)
+	if(num_of_extalloc[pos] % 1000 == 0)
 		malloc_printf("extalloc[%d]: %d\n", pos, num_of_extalloc[pos]);
 }
 
@@ -25,7 +25,7 @@ static int num_of_retain[retain_positions] = {0};
 static void log_retain(int pos)
 {
 	num_of_retain[pos] ++;
-	if(opt_retain || num_of_retain[pos] % 1000 == 0)
+	if(num_of_retain[pos] % 1000 == 0)
 		malloc_printf("retain[%d]: %d\n", pos, num_of_retain[pos]);
 }
 
@@ -1072,6 +1072,7 @@ extent_recycle_split(tsdn_t *tsdn, arena_t *arena,
 	unreachable();
 }
 
+static int recycle_counter = 0;
 /*
  * Tries to satisfy the given allocation request by reusing one of the extents
  * in the given extents_t.
@@ -1086,6 +1087,10 @@ extent_recycle(tsdn_t *tsdn, arena_t *arena, extent_hooks_t **r_extent_hooks,
 	assert(new_addr == NULL || !slab);
 	assert(pad == 0 || !slab);
 	assert(!*zero || !slab);
+
+	recycle_counter ++;
+	if(recycle_counter % 1000 == 0)
+		malloc_printf("recycle[%d]: %d\n", 0, recycle_counter);
 
 	rtree_ctx_t rtree_ctx_fallback;
 	rtree_ctx_t *rtree_ctx = tsdn_rtree_ctx(tsdn, &rtree_ctx_fallback);
