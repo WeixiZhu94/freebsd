@@ -10,6 +10,16 @@
 #include "jemalloc/internal/mutex.h"
 #include "jemalloc/internal/mutex_pool.h"
 
+
+#define extalloc_positions 3
+static int num_of_extalloc[extalloc_positions] = {0};
+static void log_extalloc(int pos)
+{
+	num_of_extalloc[pos] ++;
+	if(num_of_extalloc[pos] % 1000 == 0)
+		malloc_printf("extalloc[%d]: %d\n", pos, num_of_extalloc[pos]);
+}
+
 /******************************************************************************/
 /* Data. */
 
@@ -1193,7 +1203,7 @@ extent_alloc_default(extent_hooks_t *extent_hooks, void *new_addr, size_t size,
 	 * already.
 	 */
 	assert(arena != NULL);
-
+	log_extalloc(0);
 	return extent_alloc_default_impl(tsdn, arena, new_addr, size,
 	    alignment, zero, commit);
 }
@@ -1265,6 +1275,7 @@ extent_grow_retained(tsdn_t *tsdn, arena_t *arena,
 
 	void *ptr;
 	if (*r_extent_hooks == &extent_hooks_default) {
+		log_extalloc(1);
 		ptr = extent_alloc_default_impl(tsdn, arena, NULL,
 		    alloc_size, PAGE, &zeroed, &committed);
 	} else {
@@ -1431,6 +1442,7 @@ extent_alloc_wrapper_hard(tsdn_t *tsdn, arena_t *arena,
 	void *addr;
 	if (*r_extent_hooks == &extent_hooks_default) {
 		/* Call directly to propagate tsdn. */
+		log_extalloc(2);
 		addr = extent_alloc_default_impl(tsdn, arena, new_addr, esize,
 		    alignment, zero, commit);
 	} else {
