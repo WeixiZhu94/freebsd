@@ -25,7 +25,7 @@ static int num_of_mmap[positions] = {0};
 static void log_mmap(int pos)
 {
 	num_of_mmap[pos] ++;
-	if(opt_retain || num_of_mmap[pos] % 1000 == 0)
+	if(num_of_mmap[pos] % 1000 == 0)
 		malloc_printf("mmap[%d]: %d\n", pos, num_of_mmap[pos]);
 }
 
