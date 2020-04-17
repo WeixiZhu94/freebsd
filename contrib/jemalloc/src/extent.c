@@ -1289,6 +1289,7 @@ extent_grow_retained(tsdn_t *tsdn, arena_t *arena,
 
 	void *ptr;
 	if (*r_extent_hooks == &extent_hooks_default) {
+		/* retain:true goes this way */
 		log_extalloc(1);
 		ptr = extent_alloc_default_impl(tsdn, arena, NULL,
 		    alloc_size, PAGE, &zeroed, &committed);
@@ -1457,6 +1458,7 @@ extent_alloc_wrapper_hard(tsdn_t *tsdn, arena_t *arena,
 	void *addr;
 	if (*r_extent_hooks == &extent_hooks_default) {
 		/* Call directly to propagate tsdn. */
+		/* retain:false goes this way */
 		log_extalloc(2);
 		addr = extent_alloc_default_impl(tsdn, arena, new_addr, esize,
 		    alignment, zero, commit);
