@@ -1491,9 +1491,10 @@ extent_alloc_wrapper(tsdn_t *tsdn, arena_t *arena,
 
 	extent_t *extent = extent_alloc_retained(tsdn, arena, r_extent_hooks,
 	    new_addr, size, pad, alignment, slab, szind, zero, commit);
+	log_retain(1);
 	if (extent == NULL) {
 		if (opt_retain && new_addr != NULL) {
-			log_retain(1);
+			// log_retain(1);
 			/*
 			 * When retain is enabled and new_addr is set, we do not
 			 * attempt extent_alloc_wrapper_hard which does mmap
