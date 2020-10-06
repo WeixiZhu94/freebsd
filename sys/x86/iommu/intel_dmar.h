@@ -47,21 +47,15 @@ struct dmar_qi_genseq {
 struct dmar_map_entry {
 	dmar_gaddr_t start;
 	dmar_gaddr_t end;
-	dmar_gaddr_t free_after;	/* Free space after the entry */
-	dmar_gaddr_t free_down;		/* Max free space below the
-					   current R/B tree node */
+
 	u_int flags;
 	TAILQ_ENTRY(dmar_map_entry) dmamap_link; /* Link for dmamap entries */
-	RB_ENTRY(dmar_map_entry) rb_entry;	 /* Links for domain entries */
+
 	TAILQ_ENTRY(dmar_map_entry) unroll_link; /* Link for unroll after
 						    dmamap_load failure */
 	struct dmar_domain *domain;
 	struct dmar_qi_genseq gseq;
 };
-
-RB_HEAD(dmar_gas_entries_tree, dmar_map_entry);
-RB_PROTOTYPE(dmar_gas_entries_tree, dmar_map_entry, rb_entry,
-    dmar_gas_cmp_entries);
 
 #define	DMAR_MAP_ENTRY_PLACE	0x0001	/* Fake entry */
 #define	DMAR_MAP_ENTRY_RMRR	0x0002	/* Permanent, not linked by
@@ -111,10 +105,11 @@ struct dmar_domain {
 	vm_object_t pgtbl_obj;		/* (c) Page table pages */
 	u_int flags;			/* (u) */
 	u_int entries_cnt;		/* (d) */
-	struct dmar_gas_entries_tree rb_root; /* (d) */
+
+	vmem_t* iova_arena; /* (c) protected by vmem lock */
+	
 	struct dmar_map_entries_tailq unload_entries; /* (d) Entries to
 							 unload */
-	struct dmar_map_entry *first_place, *last_place; /* (d) */
 	struct task unload_task;	/* (c) */
 	u_int batch_no;
 };

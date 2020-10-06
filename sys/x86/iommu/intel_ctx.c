@@ -277,7 +277,7 @@ domain_init_rmrr(struct dmar_domain *domain, device_t dev, int bus,
 			ma[i] = vm_page_getfake(entry->start + PAGE_SIZE * i,
 			    VM_MEMATTR_DEFAULT);
 		}
-		error1 = dmar_gas_map_region(domain, entry,
+		error1 = dmar_gas_map_rmrr_region(domain, entry,
 		    DMAR_MAP_ENTRY_READ | DMAR_MAP_ENTRY_WRITE,
 		    DMAR_GM_CANWAIT | DMAR_GM_RMRR, ma);
 		/*
@@ -324,7 +324,6 @@ dmar_domain_alloc(struct dmar_unit *dmar, bool id_mapped)
 	domain = malloc(sizeof(*domain), M_DMAR_DOMAIN, M_WAITOK | M_ZERO);
 	domain->domain = id;
 	LIST_INIT(&domain->contexts);
-	RB_INIT(&domain->rb_root);
 	TAILQ_INIT(&domain->unload_entries);
 	TASK_INIT(&domain->unload_task, 0, dmar_domain_unload_task, domain);
 	mtx_init(&domain->lock, "dmardom", NULL, MTX_DEF);
@@ -769,12 +768,10 @@ dmar_domain_free_entry(struct dmar_map_entry *entry, bool free)
 	struct dmar_domain *domain;
 
 	domain = entry->domain;
-	DMAR_DOMAIN_LOCK(domain);
 	if ((entry->flags & DMAR_MAP_ENTRY_RMRR) != 0)
 		dmar_gas_free_region(domain, entry);
 	else
 		dmar_gas_free_space(domain, entry);
-	DMAR_DOMAIN_UNLOCK(domain);
 	if (free)
 		dmar_gas_free_entry(domain, entry);
 	else
