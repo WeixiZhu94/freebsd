@@ -123,7 +123,7 @@ dmar_gas_init_domain(struct dmar_domain *domain)
 
 	vmem_size_t quantum = DMAR_PAGE_SIZE;
 	domain->iova_arena = vmem_create("iova", 0, rounddown(domain->end, quantum),
-		quantum, 0, M_WAITOK);
+		quantum, quantum << 4, M_WAITOK);
 	domain->flags |= DMAR_DOMAIN_GAS_INITED;
 	DMAR_DOMAIN_UNLOCK(domain);
 }
