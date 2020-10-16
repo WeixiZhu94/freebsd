@@ -768,9 +768,9 @@ dmar_domain_free_entry(struct dmar_map_entry *entry, bool free)
 	struct dmar_domain *domain;
 
 	domain = entry->domain;
-	if ((entry->flags & DMAR_MAP_ENTRY_RMRR) != 0)
-		dmar_gas_free_region(domain, entry);
-	else
+	// if ((entry->flags & DMAR_MAP_ENTRY_RMRR) != 0)
+	// 	dmar_gas_free_region(domain, entry);
+	// else
 		dmar_gas_free_space(domain, entry);
 	if (free)
 		dmar_gas_free_entry(domain, entry);
