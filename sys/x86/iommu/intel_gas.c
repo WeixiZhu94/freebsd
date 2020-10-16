@@ -224,7 +224,7 @@ dmar_gas_map(struct dmar_domain *domain,
 }
 
 int
-dmar_gas_map_rmrr_region(struct dmar_domain *domain, struct dmar_map_entry *entry,
+dmar_gas_map_region(struct dmar_domain *domain, struct dmar_map_entry *entry,
     u_int eflags, u_int flags, vm_page_t *ma)
 {
 	dmar_gaddr_t start;
