@@ -182,7 +182,7 @@ dmar_gas_alloc_region(struct dmar_domain *domain, struct dmar_map_entry *entry,
 void
 dmar_gas_free_space(struct dmar_domain *domain, struct dmar_map_entry *entry)
 {
-	if (unlikely((entry->flags & DMAR_MAP_ENTRY_RMRR) != 0)) {
+	if ((entry->flags & DMAR_MAP_ENTRY_RMRR) != 0) {
 		vmem_xfree(domain->iova_arena, entry->start, entry->end - entry->start);
 		entry->flags &= ~DMAR_MAP_ENTRY_RMRR;
 	}
