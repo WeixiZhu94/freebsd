@@ -172,7 +172,7 @@ dmar_gas_alloc_region(struct dmar_domain *domain, struct dmar_map_entry *entry,
 			entry->start, start);
 		return (ENOMEM);
 	}
-
+	printf("vmem_xalloc for rmrr [%lx, %lx] successed\n", entry->start, entry->end);
 	if ((flags & DMAR_GM_RMRR) != 0)
 		entry->flags = DMAR_MAP_ENTRY_RMRR;
 
