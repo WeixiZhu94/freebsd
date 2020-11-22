@@ -158,7 +158,7 @@ dmar_gas_alloc_region(struct dmar_domain *domain, struct dmar_map_entry *entry,
 	if (entry->end >= domain->end)
 		return (EINVAL);
 
-	if (vmem_xalloc(domain->iova_arena, size, 0, 0, 0, 
+	if (vmem_xalloc(domain->iova_arena, entry->end - entry->start, 0, 0, 0, 
 					(vmem_addr_t) entry->start, (vmem_addr_t) entry->end, 
 				    M_BESTFIT | ((flags & DMAR_GM_CANWAIT) != 0 ?
 					M_WAITOK : M_NOWAIT),
