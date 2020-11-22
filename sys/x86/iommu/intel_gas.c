@@ -149,6 +149,7 @@ static int
 dmar_gas_alloc_region(struct dmar_domain *domain, struct dmar_map_entry *entry,
     u_int flags)
 {
+	vmem_addr_t start;
 	if ((entry->start & DMAR_PAGE_MASK) != 0 ||
 	    (entry->end & DMAR_PAGE_MASK) != 0)
 		return (EINVAL);
@@ -157,8 +158,20 @@ dmar_gas_alloc_region(struct dmar_domain *domain, struct dmar_map_entry *entry,
 	if (entry->end >= domain->end)
 		return (EINVAL);
 
-	printf("reserve request of range [%lx, %lx] not supported, so fuck you\n",
-	    entry->start, entry->end);
+	if (vmem_xalloc(domain->iova_arena, size, 0, 0, 0, 
+					(vmem_addr_t) entry->start, (vmem_addr_t) entry->end, 
+				    M_BESTFIT | ((flags & DMAR_GM_CANWAIT) != 0 ?
+					M_WAITOK : M_NOWAIT),
+				    &start)) {
+		printf("vmem_xalloc for reserve request of range [%lx, %lx] failed\n",
+		    entry->start, entry->end);
+		return (ENOMEM);
+	}
+	if (start != entry->start) {
+		printf("vmem_xalloc returned false start addr, expected %lx returned %lx\n",
+			entry->start, start);
+		return (ENOMEM);
+	}
 
 	if ((flags & DMAR_GM_RMRR) != 0)
 		entry->flags = DMAR_MAP_ENTRY_RMRR;
@@ -169,9 +182,14 @@ dmar_gas_alloc_region(struct dmar_domain *domain, struct dmar_map_entry *entry,
 void
 dmar_gas_free_space(struct dmar_domain *domain, struct dmar_map_entry *entry)
 {
-	vmem_free(domain->iova_arena, entry->start,
-		    entry->end - entry->start);
-	entry->flags &= ~(DMAR_MAP_ENTRY_MAP | DMAR_MAP_ENTRY_RMRR);
+	if (unlikely((entry->flags & DMAR_MAP_ENTRY_RMRR) != 0)) {
+		vmem_xfree(domain->iova_arena, entry->start, entry->end - entry->start);
+		entry->flags &= ~DMAR_MAP_ENTRY_RMRR;
+	}
+	else {
+		vmem_free(domain->iova_arena, entry->start, entry->end - entry->start);
+		entry->flags &= ~DMAR_MAP_ENTRY_MAP;
+	}
 }
 
 int
@@ -191,13 +209,11 @@ dmar_gas_map(struct dmar_domain *domain,
 	if (entry == NULL)
 		return (ENOMEM);
 
-	error = vmem_alloc(domain->iova_arena, size,
-				    M_BESTFIT | ((flags & DMAR_GM_CANWAIT) != 0 ?
-					M_WAITOK : M_NOWAIT),
-				    &start);
-	if(error != 0)
-	{
-		printf("FUCK!!! No memory for iova allocation\n");
+	if (vmem_alloc(domain->iova_arena, size,
+				   M_BESTFIT | ((flags & DMAR_GM_CANWAIT) != 0 ?
+				   M_WAITOK : M_NOWAIT),
+				   &start)) {
+		printf("vmem allocation failed for iova\n");
 		return (ENOMEM);
 	}
 
